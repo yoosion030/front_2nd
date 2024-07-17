@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { describe, expect, test } from "vitest";
 import { act, fireEvent, render, screen, within } from "@testing-library/react";
 
@@ -8,6 +7,8 @@ import { AdminPage } from "pages/AdminPage";
 import { Coupon, Product } from "types";
 import { CouponProvider } from "provider/coupon";
 import { CartProvider } from "refactoring/components/provider/cart";
+import { ProductProvider } from "refactoring/components/provider/product";
+import { PropsWithChildren } from "react";
 
 const mockProducts: Product[] = [
   {
@@ -32,6 +33,7 @@ const mockProducts: Product[] = [
     discounts: [{ quantity: 10, rate: 0.2 }],
   },
 ];
+
 const mockCoupons: Coupon[] = [
   {
     name: "5000원 할인 쿠폰",
@@ -47,44 +49,21 @@ const mockCoupons: Coupon[] = [
   },
 ];
 
-const TestAdminPage = () => {
-  const [products, setProducts] = useState<Product[]>(mockProducts);
-
-  const handleProductUpdate = (updatedProduct: Product) => {
-    setProducts((prevProducts) =>
-      prevProducts.map((p) =>
-        p.id === updatedProduct.id ? updatedProduct : p,
-      ),
-    );
-  };
-
-  const handleProductAdd = (newProduct: Product) => {
-    setProducts((prevProducts) => [...prevProducts, newProduct]);
-  };
-
+const ProviderWrapper = ({ children }: PropsWithChildren) => {
   return (
-    <CouponProvider initialCoupons={mockCoupons}>
-      <CartProvider>
-        <AdminPage
-          products={products}
-          onProductUpdate={handleProductUpdate}
-          onAddProduct={handleProductAdd}
-        />
-      </CartProvider>
-    </CouponProvider>
+    <ProductProvider initialProducts={mockProducts}>
+      <CouponProvider initialCoupons={mockCoupons}>
+        <CartProvider>{children}</CartProvider>
+      </CouponProvider>
+    </ProductProvider>
   );
 };
 
 describe("advanced > ", () => {
   describe("시나리오 테스트 > ", () => {
     test("장바구니 페이지 테스트 > ", async () => {
-      render(
-        <CouponProvider initialCoupons={mockCoupons}>
-          <CartProvider>
-            <CartPage products={mockProducts} />
-          </CartProvider>
-        </CouponProvider>,
-      );
+      render(<CartPage />, { wrapper: ProviderWrapper });
+
       const product1 = screen.getByTestId("product-p1");
       const product2 = screen.getByTestId("product-p2");
       const product3 = screen.getByTestId("product-p3");
@@ -164,7 +143,7 @@ describe("advanced > ", () => {
     });
 
     test("관리자 페이지 테스트 > ", async () => {
-      render(<TestAdminPage />);
+      render(<AdminPage />, { wrapper: ProviderWrapper });
 
       const $product1 = screen.getByTestId("product-1");
 

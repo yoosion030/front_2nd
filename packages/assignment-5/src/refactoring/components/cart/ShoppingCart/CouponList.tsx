@@ -1,9 +1,8 @@
-import { useCartContext } from "provider/cart/useCartContext";
 import { useCouponContext } from "provider/coupon/useCouponContext";
 
 const CouponList = () => {
-  const { selectedCoupon, applyCoupon } = useCartContext();
-  const { coupons } = useCouponContext();
+  const { coupons, selectedCoupon, applyCoupon } = useCouponContext();
+
   return (
     <div className="mt-6 bg-white p-4 rounded shadow">
       <h2 className="text-2xl font-semibold mb-2">쿠폰 적용</h2>
@@ -13,7 +12,7 @@ const CouponList = () => {
       >
         <option value="">쿠폰 선택</option>
         {coupons.map((coupon, index) => (
-          <option key={coupon.code} value={index}>
+          <option key={coupon.code} value={index} data-testid="coupon-option">
             {coupon.name} -{" "}
             {coupon.discountType === "amount"
               ? `${coupon.discountValue}원`
@@ -23,7 +22,7 @@ const CouponList = () => {
       </select>
 
       {selectedCoupon && (
-        <p className="text-green-600">
+        <p className="text-green-600" data-testid="selected-coupon">
           적용된 쿠폰: {selectedCoupon.name}(
           {selectedCoupon.discountType === "amount"
             ? `${selectedCoupon.discountValue}원`

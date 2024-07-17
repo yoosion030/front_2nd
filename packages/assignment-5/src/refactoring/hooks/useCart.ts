@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import type { CartItemType, Coupon, Product } from "types";
 import {
   calculateCartTotal,
@@ -7,7 +7,6 @@ import {
 
 export const useCart = () => {
   const [cartList, setCartList] = useState<CartItemType[]>([]);
-  const [selectedCoupon, setSelectedCoupon] = useState<Coupon | null>(null);
 
   const addToCart = (product: Product) => {
     setCartList((prevCartList) => {
@@ -45,22 +44,16 @@ export const useCart = () => {
     );
   };
 
-  const applyCoupon = (coupon: Coupon) => {
-    setSelectedCoupon(coupon);
-  };
-
-  const calculateTotal = useMemo(
-    () => calculateCartTotal({ cart: cartList, selectedCoupon }),
-    [cartList, selectedCoupon],
-  );
+  const calculateTotal = (
+    cartList: CartItemType[],
+    selectedCoupon: Coupon | null,
+  ) => calculateCartTotal({ cart: cartList, selectedCoupon });
 
   return {
     cartList,
     addToCart,
     removeFromCart,
     updateQuantity,
-    applyCoupon,
     calculateTotal,
-    selectedCoupon,
   };
 };

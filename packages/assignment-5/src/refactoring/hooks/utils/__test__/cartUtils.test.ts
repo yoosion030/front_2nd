@@ -5,7 +5,7 @@ import {
   calculateItemTotal,
   getMaxApplicableDiscount,
   updateCartItemQuantity,
-} from "./cartUtils";
+} from "../cartUtils";
 import { Coupon } from "types";
 
 describe("cartUtils", () => {
