@@ -1,4 +1,5 @@
-import type { CartItemType, Coupon } from "types";
+import type { CartItemType, Coupon, Discount } from "types";
+import type { Product } from "types";
 
 export const calculateItemTotal = (item: CartItemType): number => {
   const discount = getMaxApplicableDiscount(item);
@@ -107,4 +108,22 @@ export const updateCartItemQuantity = ({
     }
     return cart;
   });
+};
+
+export const getMaxDiscount = (discounts: Discount[]) => {
+  return discounts.reduce((max, discount) => Math.max(max, discount.rate), 0);
+};
+
+interface GetRemainingStock {
+  product: Product;
+  cartList: CartItemType[];
+}
+export const getRemainingStock = ({ product, cartList }: GetRemainingStock) => {
+  const cartItem = cartList?.find((item) => item.product.id === product.id);
+  return product.stock - (cartItem?.quantity || 0);
+};
+
+export const formatDiscount = (coupon: Coupon) => {
+  const value = coupon.discountValue.toLocaleString();
+  return coupon.discountType === "amount" ? `${value}원` : `${value}%`;
 };

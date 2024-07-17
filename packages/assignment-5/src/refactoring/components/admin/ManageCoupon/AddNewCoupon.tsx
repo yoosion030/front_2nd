@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useCouponContext } from "provider/coupon/useCouponContext";
 import type { Coupon } from "types";
 
@@ -23,6 +23,13 @@ const AddNewCoupon = () => {
     });
   };
 
+  const canSubmit = useMemo(
+    () =>
+      newCoupon.name !== "" &&
+      newCoupon.code !== "" &&
+      newCoupon.discountValue > 0,
+    [newCoupon],
+  );
   return (
     <>
       <input
@@ -67,8 +74,9 @@ const AddNewCoupon = () => {
         />
       </div>
       <button
+        disabled={!canSubmit}
         onClick={handleAddCoupon}
-        className="w-full bg-green-500 text-white p-2 rounded hover:bg-green-600"
+        className="w-full bg-green-500 text-white p-2 rounded hover:bg-green-600 disabled:bg-green-300"
       >
         쿠폰 추가
       </button>

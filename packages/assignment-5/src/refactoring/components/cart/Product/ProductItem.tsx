@@ -1,25 +1,16 @@
-// components/cart/ProductItem.tsx
-import React from "react";
-import { Product } from "types";
+import type { Product } from "types";
 import { useCartContext } from "provider/cart/useCartContext";
+import { getMaxDiscount, getRemainingStock } from "hooks/utils/cartUtils";
 
 interface ProductItemProps {
   product: Product;
 }
 
-const ProductItem = ({ product }: ProductItemProps): JSX.Element => {
+const ProductItem = ({ product }: ProductItemProps) => {
   const { cartList, addToCart } = useCartContext();
 
-  const getMaxDiscount = (discounts: { quantity: number; rate: number }[]) => {
-    return discounts.reduce((max, discount) => Math.max(max, discount.rate), 0);
-  };
-
-  const getRemainingStock = (product: Product) => {
-    const cartItem = cartList?.find((item) => item.product.id === product.id);
-    return product.stock - (cartItem?.quantity || 0);
-  };
-
-  const remainingStock = getRemainingStock(product);
+  const remainingStock = getRemainingStock({ product, cartList });
+  const hasDiscount = product.discounts.length > 0;
 
   return (
     <div
@@ -41,14 +32,14 @@ const ProductItem = ({ product }: ProductItemProps): JSX.Element => {
         >
           재고: {remainingStock}개
         </span>
-        {product.discounts.length > 0 && (
+        {hasDiscount && (
           <span className="ml-2 font-medium text-blue-600">
             최대
             {(getMaxDiscount(product.discounts) * 100).toFixed(0)}% 할인
           </span>
         )}
       </div>
-      {product.discounts.length > 0 && (
+      {hasDiscount && (
         <ul className="list-disc list-inside text-sm text-gray-500 mb-2">
           {product.discounts.map((discount, index) => (
             <li key={index}>

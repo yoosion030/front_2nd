@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
-import { useCart } from "./useCart";
+import { useCart } from "../useCart";
 import { act, renderHook } from "@testing-library/react";
-import { Coupon, Product } from "types";
+import type { Product } from "types";
 
 const mockProducts: Product[] = [
   {
@@ -24,21 +24,6 @@ const mockProducts: Product[] = [
     price: 30000,
     stock: 20,
     discounts: [{ quantity: 10, rate: 0.2 }],
-  },
-];
-
-const mockCoupons: Coupon[] = [
-  {
-    name: "5000원 할인 쿠폰",
-    code: "AMOUNT5000",
-    discountType: "amount",
-    discountValue: 5000,
-  },
-  {
-    name: "10% 할인 쿠폰",
-    code: "PERCENT10",
-    discountType: "percentage",
-    discountValue: 10,
   },
 ];
 
@@ -130,26 +115,6 @@ describe("useCart", () => {
     });
   });
 
-  describe("applyCoupon", () => {
-    it("선택한 쿠폰이 적용되어야 한다.", () => {
-      const { result } = renderHook(() => useCart());
-
-      expect(result.current.selectedCoupon).toBeNull();
-
-      act(() => {
-        result.current.applyCoupon(mockCoupons[0]);
-      });
-
-      expect(result.current.selectedCoupon).toEqual(mockCoupons[0]);
-
-      act(() => {
-        result.current.applyCoupon(mockCoupons[1]);
-      });
-
-      expect(result.current.selectedCoupon).toEqual(mockCoupons[1]);
-    });
-  });
-
   describe("calculateTotal", () => {
     it("총 가격이 계산되어야 한다.", () => {
       const { result } = renderHook(() => useCart());
@@ -159,7 +124,9 @@ describe("useCart", () => {
         result.current.addToCart(mockProducts[0]);
       });
 
-      expect(result.current.calculateTotal).toEqual({
+      expect(
+        result.current.calculateTotal(result.current.cartList, null),
+      ).toEqual({
         totalBeforeDiscount: 30000,
         totalAfterDiscount: 30000,
         totalDiscount: 0,
