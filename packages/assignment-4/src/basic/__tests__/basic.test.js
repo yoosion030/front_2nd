@@ -73,7 +73,7 @@ describe("basic test", () => {
 
       // 상품 제거
       const removeButton = document.querySelector(
-        '.remove-item[data-product-id="p1"]'
+        '.remove-item[data-product-id="p1"]',
       );
       removeButton.click();
 
@@ -98,7 +98,7 @@ describe("basic test", () => {
         const cartItems = document.querySelectorAll("#cart-items > div");
         expect(cartItems.length).toBe(0);
         expect(document.querySelector("#cart-total").textContent.trim()).toBe(
-          "총액: 0원"
+          "총액: 0원",
         );
       });
 

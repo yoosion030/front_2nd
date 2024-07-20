@@ -122,10 +122,10 @@ describe("advanced > ", () => {
       }
 
       // 9. 할인율 계산
+
       expect(screen.getByText("상품 금액: 700,000원")).toBeInTheDocument();
       expect(screen.getByText("할인 금액: 110,000원")).toBeInTheDocument();
       expect(screen.getByText("최종 결제 금액: 590,000원")).toBeInTheDocument();
-
       // 10. 쿠폰 적용하기
       const couponSelect = screen.getByRole("combobox");
       fireEvent.change(couponSelect, { target: { value: "1" } }); // 10% 할인 쿠폰 선택
