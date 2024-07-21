@@ -1,0 +1,14 @@
+[
+  {
+    "url": "http://localhost:50740/",
+    "isRepresentativeRun": true,
+    "htmlPath": "/Users/classting/github/front_2nd/packages/assignment-6/lhci_reports/_-2024_07_22_15_58_01-report.html",
+    "jsonPath": "/Users/classting/github/front_2nd/packages/assignment-6/lhci_reports/_-2024_07_22_15_58_01-report.json",
+    "summary": {
+      "performance": 0.97,
+      "accessibility": 0.84,
+      "best-practices": 0.96,
+      "seo": 0.9
+    }
+  }
+]
