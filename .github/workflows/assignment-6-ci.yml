@@ -253,7 +253,7 @@ jobs:
               issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
-              body: `@, 리뷰를 부탁드립니다.`
+              body: `@${randomReviewer}, 리뷰를 부탁드립니다.`
             });
 
             github.rest.pulls.requestReviewers({
