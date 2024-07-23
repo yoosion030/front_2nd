@@ -25,7 +25,7 @@ jobs:
 
       - name: Build
         run: |
-          pnpm install 
+          pnpm install --prefer-frozen-lockfile 
           pnpm -F assignment-6 build
 
   lint:
@@ -42,7 +42,7 @@ jobs:
 
       - name: Lint
         run: |
-          pnpm install
+          pnpm install --prefer-frozen-lockfile
           pnpm -F assignment-6 lint > eslint_report.txt
       - name: Lint Failure
         if: failure()
@@ -143,7 +143,7 @@ jobs:
 
       - name: Install Lighthouse CI
         run: |
-          npm i -E -g @lhci/cli
+          npm i @lhci/cli --prefer-frozen-lockfile
           pnpm install
       - name: Build Local Server
         run: |
@@ -173,7 +173,6 @@ jobs:
               Object.keys(summary).forEach(
                 (key) => (summary[key] = formatResult(summary[key]))
               );
-
 
               const score = (res) => (res >= 90 ? "🟢" : res >= 50 ? "🟠" : "🔴");
 
