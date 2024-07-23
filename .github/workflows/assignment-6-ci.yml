@@ -121,7 +121,7 @@ jobs:
 
               테스트 코드를 확인해주세요.
             `
-            await ithub.rest.issues.createComment({
+            await github.rest.issues.createComment({
               issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
