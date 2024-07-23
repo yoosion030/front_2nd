@@ -143,7 +143,7 @@ jobs:
 
       - name: Install Lighthouse CI
         run: |
-          npm i @lhci/cli --prefer-frozen-lockfile
+          npm i -g @lhci/cli --prefer-frozen-lockfile
           pnpm install
       - name: Build Local Server
         run: |
