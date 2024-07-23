@@ -4,36 +4,166 @@ on:
   pull_request:
     types:
       - opened
+      - reopened
+      - synchronize
     paths:
-      - 'packages/assignment-6/**'
+      - "packages/assignment-6/**"
+      - ".github/workflows/assignment-6-ci.yml"
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: job1 구현
-        run: echo "job1의 내용을 구현해주세요"
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: latest
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: "pnpm"
+
+      - name: Build
+        run: |
+          pnpm install 
+          pnpm -F assignment-6 build
 
   lint:
     runs-on: ubuntu-latest
     steps:
-      - name: job2 구현
-        run: echo "job2의 내용을 구현해주세요"
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: latest
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: "pnpm"
+
+      - name: Lint
+        run: |
+          pnpm install
+          pnpm -F assignment-6 lint > eslint_report.txt
+      - name: Lint Failure
+        if: failure()
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.TOKEN_FOR_CI }}
+          script: |
+            const fs = require('fs')
+            const eslintReport = fs.readFileSync('eslint_report.txt', 'utf8');
+
+            const lintReport = require('.github/scripts/lint-report.js')
+            await lintReport({ github, context, eslintReport })
 
   test:
     runs-on: ubuntu-latest
     steps:
-      - name: job3 구현
-        run: echo "job3의 내용을 구현해주세요"
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: latest
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: "pnpm"
+
+      - name: Testing and Coverage
+        run: |
+          pnpm install
+          pnpm -F assignment-6 test
+          pnpm -F assignment-6 coverage
+
+      - name: Comment Test Coverage
+        uses: actions/github-script@v6
+        if: success()
+        with:
+          github-token: ${{ secrets.TOKEN_FOR_CI }}
+          script: |
+            const fs = require("fs");
+            const coverage = JSON.parse(fs.readFileSync("packages/assignment-6/coverage/coverage-summary.json", "utf8"));
+
+            const testCoverageReport = require('.github/scripts/test-coverage-report.js');
+            await testCoverageReport({ github, context, coverage });
+
+      - name: Comment Test Coverage on Failure
+        if: failure()
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+
+            const testFailureReport = require('.github/scripts/test-failure-report.js');
+            await testFailureReport({ github, context });
 
   lighthouse:
     runs-on: ubuntu-latest
+
     steps:
-      - name: job4 구현
-        run: echo "job4의 내용을 구현해주세요"
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: latest
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: "pnpm"
+
+      - name: Install Lighthouse CI
+        run: |
+          npm i -E -g @lhci/cli
+          pnpm install
+      - name: Build Local Server
+        run: |
+          pnpm -F assignment-6 build
+          pnpm -F assignment-6 lighthouse
+      - name: Report Lighthouse
+        if: success()
+        uses: actions/github-script@v6
+        env:
+          LHCI_GITHUB_APP_TOKEN: ${{ secrets.LHCI_GITHUB_APP_TOKEN }}
+        with:
+          github-token: ${{ secrets.TOKEN_FOR_CI }}
+          script: |
+            const fs = require('fs');
+            const results = JSON.parse(fs.readFileSync("packages/assignment-6/lhci_reports/manifest.json", 'utf-8'))
+
+            const details = JSON.parse(fs.readFileSync(results.jsonPath, 'utf-8'));
+            const { audits } = details;
+
+            const lightHouseReport = require('.github/scripts/lighthouse-report.js');
+            await lightHouseReport({ github, context, results });
 
   assign_reviewer:
     runs-on: ubuntu-latest
     steps:
-      - name: job5 구현
-        run: echo "job5의 내용을 구현해주세요"
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: latest
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: "pnpm"
+
+      - name: Assign Reviewer
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const reviewers = ["yoosion030", "dhp94d", "lydiahjchung", "callipenguin"];
+            const randomReviewer = reviewers[Math.floor(Math.random() * reviewers.length)];
+
+            await github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: `@, 리뷰를 부탁드립니다.`
+            });
+
+            await github.rest.pulls.requestReviewers({
+              pull_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              reviewers: [randomReviewer]
+            });
