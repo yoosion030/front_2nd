@@ -88,26 +88,13 @@ jobs:
           github-token: ${{ secrets.TOKEN_FOR_CI }}
           script: |
             const fs = require('fs');
-
             const coverage = JSON.parse(fs.readFileSync("packages/assignment-6/coverage/coverage-summary.json", 'utf8'));
-            const totalCoverage = coverage.total;
 
-            const coverageComment = `
-
-            ## 테스트 성공 ✅
-            ### 커버리지 결과
-
-            - 라인 커버리지: ${totalCoverage.lines.pct}%
-            - 브랜치 커버리지: ${totalCoverage.branches.pct}%
-            - 함수 커버리지: ${totalCoverage.functions.pct}%
-            - 구문 커버리지: ${totalCoverage.statements.pct}%
-            `;
-
-            await github.rest.issues.createComment({
-              issue_number: context.issue.number,
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              body: coverageComment
+            const testCoverage = require('.github/scripts/test-coverage.js');
+            await testCoverage.reportTestSuccess({
+              totalCoverage: coverage.total,
+              context,
+              github
             });
 
       - name: Comment Test Coverage on Failure
@@ -116,16 +103,10 @@ jobs:
         with:
           github-token: ${{secrets.TOKEN_FOR_CI}}
           script: |
-            const coverageComment = `
-              ## 테스트 실패 ❌
-
-              테스트 코드를 확인해주세요.
-            `
-            await github.rest.issues.createComment({
-              issue_number: context.issue.number,
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              body: coverageComment
+            const testCoverage = require('.github/scripts/test-coverage.js');
+            await testCoverage.reportTestFailure({
+              context,
+              github
             });
 
   lighthouse:
