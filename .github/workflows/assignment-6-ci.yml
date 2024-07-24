@@ -17,15 +17,29 @@ jobs:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
         with:
-          version: latest
+          version: 8
+          run_install: false
+
       - uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: "pnpm"
 
+      - name: Get pnpm store directory
+        shell: bash
+        run: |
+          echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
+      - name: Install PNPM
+        run: |
+          pnpm install --prefer-frozen-lockfile
+      - name: Cache dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.pnpm-store
+          key: ${{ runner.os }}-pnpm-${{ hashFiles('**/pnpm-lock.yaml') }}
+
       - name: Build
         run: |
-          pnpm install --prefer-frozen-lockfile 
           pnpm -F assignment-6 build
 
   lint:
@@ -34,19 +48,33 @@ jobs:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
         with:
-          version: latest
+          version: 8
+          run_install: false
+
       - uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: "pnpm"
 
-      - name: Lint
-        continue-on-error: true
+      - name: Get pnpm store directory
+        shell: bash
+        run: |
+          echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
+      - name: Install PNPM
         run: |
           pnpm install --prefer-frozen-lockfile
+      - name: Cache dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.pnpm-store
+          key: ${{ runner.os }}-pnpm-${{ hashFiles('**/pnpm-lock.yaml') }}
+
+      - name: Lint
+        run: |
           pnpm -F assignment-6 lint > eslint_report.txt
 
-      - name: Report Lint
+      - name: Report Lint Success
+        if: success()
         uses: actions/github-script@v6
         with:
           github-token: ${{ secrets.TOKEN_FOR_CI }}
@@ -55,18 +83,26 @@ jobs:
             const eslintReport = fs.readFileSync('eslint_report.txt', 'utf8')
 
             const lint = require('.github/scripts/lint.js');
-            try {
-              await lint.reportLintSuccess({
-                context,
-                github
-              });
-            } catch(e) {
-              await lint.reportLintFailure({
-                eslintReport,
-                context,
-                github
-              });
-            }
+            await lint.reportLintSuccess({
+              context,
+              github
+            });
+
+      - name: Report Lint Failure
+        if: failure()
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.TOKEN_FOR_CI }}
+          script: |
+            const fs = require('fs')
+            const eslintReport = fs.readFileSync('eslint_report.txt', 'utf8')
+
+            const lint = require('.github/scripts/lint.js');
+            await lint.reportLintFailure({
+              eslintReport,
+              context,
+              github
+            });
 
   test:
     runs-on: ubuntu-latest
@@ -74,15 +110,29 @@ jobs:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
         with:
-          version: latest
+          version: 8
+          run_install: false
+
       - uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: "pnpm"
 
-      - name: Testing and Coverage
+      - name: Get pnpm store directory
+        shell: bash
+        run: |
+          echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
+      - name: Install PNPM
         run: |
           pnpm install --prefer-frozen-lockfile
+      - name: Cache dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.pnpm-store
+          key: ${{ runner.os }}-pnpm-${{ hashFiles('**/pnpm-lock.yaml') }}
+
+      - name: Testing and Coverage
+        run: |
           pnpm -F assignment-6 test
           pnpm -F assignment-6 coverage
 
@@ -121,16 +171,30 @@ jobs:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
         with:
-          version: latest
+          version: 8
+          run_install: false
+
       - uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: "pnpm"
 
+      - name: Get pnpm store directory
+        shell: bash
+        run: |
+          echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
+      - name: Install PNPM
+        run: |
+          pnpm install --prefer-frozen-lockfile
+      - name: Cache dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.pnpm-store
+          key: ${{ runner.os }}-pnpm-${{ hashFiles('**/pnpm-lock.yaml') }}
+
       - name: Install Lighthouse CI
         run: |
-          npm i -g @lhci/cli 
-          pnpm install --prefer-frozen-lockfile
+          npm i -g @lhci/cli
 
       - name: Build Local Server
         run: |
@@ -178,7 +242,9 @@ jobs:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
         with:
-          version: latest
+          version: 8
+          run_install: false
+
       - uses: actions/setup-node@v4
         with:
           node-version: 20
