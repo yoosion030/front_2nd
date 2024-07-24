@@ -160,7 +160,8 @@ jobs:
             await lighthouse.reportLighthouseSuccess({
               results,
               context,
-              github
+              github,
+              fs
             });
 
       - name: Report Lighthouse on Failure
@@ -199,7 +200,7 @@ jobs:
             const reviewers = ["yoosion030", "dhp94d", "lydiahjchung", "callipenguin"];
             const randomReviewer = reviewers[Math.floor(Math.random() * reviewers.length)];
 
-            await github.rest.issues.createReport({
+            await github.rest.issues.createComment({
               issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,

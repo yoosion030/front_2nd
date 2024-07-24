@@ -1,4 +1,4 @@
-const reportLighthouseSuccess = async ({ github, context, results }) => {
+const reportLighthouseSuccess = async ({ github, context, results, fs }) => {
   let comments = "";
 
   results.forEach((result) => {
