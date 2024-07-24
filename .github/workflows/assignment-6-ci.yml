@@ -45,7 +45,7 @@ jobs:
           pnpm install --prefer-frozen-lockfile
           pnpm -F assignment-6 lint > eslint_report.txt
 
-      - name: Lint Success
+      - name: Report Lint Success
         if: success()
         uses: actions/github-script@v6
         with:
@@ -60,7 +60,7 @@ jobs:
               github
             });
 
-      - name: Lint Failure
+      - name: Report Lint Failure
         if: failure()
         uses: actions/github-script@v6
         with:
@@ -94,7 +94,7 @@ jobs:
           pnpm -F assignment-6 test
           pnpm -F assignment-6 coverage
 
-      - name: Comment Test Coverage
+      - name: Report Test Coverage
         uses: actions/github-script@v6
         if: success()
         with:
@@ -110,7 +110,7 @@ jobs:
               github
             });
 
-      - name: Comment Test Coverage on Failure
+      - name: Report Test Coverage on Failure
         if: failure()
         uses: actions/github-script@v6
         with:
@@ -156,71 +156,27 @@ jobs:
             const fs = require('fs');
             const results = JSON.parse(fs.readFileSync("packages/assignment-6/lhci_reports/manifest.json", 'utf-8'))
 
-            let comments = "";
-
-            results.forEach((result) => {
-              const { summary, jsonPath } = result;
-              const details = JSON.parse(fs.readFileSync(jsonPath))
-              const { audits } = details;
-
-              const formatResult = (res) => Math.round(res * 100);
-
-              Object.keys(summary).forEach(
-                (key) => (summary[key] = formatResult(summary[key]))
-              );
-
-              const score = (res) => (res >= 90 ? "🟢" : res >= 50 ? "🟠" : "🔴");
-
-              const comment = [
-                `⚡️ Lighthouse report!`,
-                `| Category | Score |`,
-                `| --- | --- |`,
-                `| ${score(summary.performance)} Performance | ${summary.performance} |`,
-                `| ${score(summary.accessibility)} Accessibility | ${
-                  summary.accessibility
-                } |`,
-                `| ${score(summary['best-practices'])} Best practices | ${
-                  summary['best-practices']
-                } |`,
-                `| ${score(summary.seo)} SEO | ${summary.seo} |`,
-                ''
-              ].join('\n');
-
-              const detail = [
-                `📊 Lighthouse Detail`,
-                `| Category | Score |`,
-                `| --- | --- |`,
-                `| ${score(
-                  audits['first-contentful-paint'].score * 100
-                )} First Contentful Paint | ${
-                  audits['first-contentful-paint'].displayValue
-                } |`,
-                `| ${score(
-                  audits['largest-contentful-paint'].score * 100
-                )} Largest Contentful Paint | ${
-                  audits['largest-contentful-paint'].displayValue
-                } |`,
-                `| ${score(
-                  audits['total-blocking-time'].score * 100
-                )} Total Blocking Time | ${audits['total-blocking-time'].displayValue} |`,
-                `| ${score(
-                  audits['cumulative-layout-shift'].score * 100
-                )} Cumulative Layout Shift | ${
-                  audits['cumulative-layout-shift'].displayValue
-                } |`,
-                `| ${score(audits['speed-index'].score * 100)} Speed Index | ${
-                  audits['speed-index'].displayValue
-                } |`,
-              ].join('\n');
-
-              comments += comment + "\n" + detail + "\n";
+            const lighthouse = require('.github/scripts/lighthouse.js');
+            await lighthouse.reportLighthouseSuccess({
+              results,
+              context,
+              github
             });
 
-            await github.rest.issues.createComment({
-              issue_number: context.issue.number,
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              body: comments
+      - name: Report Lighthouse on Failure
+        if: failure()
+        uses: actions/github-script@v6
+        env:
+          LHCI_GITHUB_APP_TOKEN: ${{ secrets.LHCI_GITHUB_APP_TOKEN }}
+        with:
+          github-token: ${{ secrets.TOKEN_FOR_CI }}
+          script: |
+            const fs = require('fs');
+
+            const lighthouse = require('.github/scripts/lighthouse.js');
+            await lighthouse.reportLighthouseFailure({
+              context,
+              github
             });
 
   assign_reviewer:
@@ -243,7 +199,7 @@ jobs:
             const reviewers = ["yoosion030", "dhp94d", "lydiahjchung", "callipenguin"];
             const randomReviewer = reviewers[Math.floor(Math.random() * reviewers.length)];
 
-            await github.rest.issues.createComment({
+            await github.rest.issues.createReport({
               issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
