@@ -45,8 +45,7 @@ jobs:
           pnpm install --prefer-frozen-lockfile
           pnpm -F assignment-6 lint > eslint_report.txt
 
-      - name: Report Lint Success
-        if: success()
+      - name: Report Lint
         uses: actions/github-script@v6
         with:
           github-token: ${{ secrets.TOKEN_FOR_CI }}
@@ -55,26 +54,18 @@ jobs:
             const eslintReport = fs.readFileSync('eslint_report.txt', 'utf8')
 
             const lint = require('.github/scripts/lint.js');
-            await lint.reportLintSuccess({
-              context,
-              github
-            });
-
-      - name: Report Lint Failure
-        if: failure()
-        uses: actions/github-script@v6
-        with:
-          github-token: ${{ secrets.TOKEN_FOR_CI }}
-          script: |
-            const fs = require('fs')
-            const eslintReport = fs.readFileSync('eslint_report.txt', 'utf8')
-
-            const lint = require('.github/scripts/lint.js');
-            await lint.reportLintFailure({
-              eslintReport,
-              context,
-              github
-            });
+            try {
+              await lint.reportLintSuccess({
+                context,
+                github
+              });
+            } catch(e) {
+              await lint.reportLintFailure({
+                eslintReport,
+                context,
+                github
+              });
+            }
 
   test:
     runs-on: ubuntu-latest
