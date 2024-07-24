@@ -197,7 +197,7 @@ jobs:
         with:
           github-token: ${{secrets.TOKEN_FOR_CI}}
           script: |
-            const review = require('.github/scripts/reviewer.js');
+            const review = require('.github/scripts/review.js');
 
             await review.commentReviewer({
               context,
