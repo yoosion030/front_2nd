@@ -44,6 +44,22 @@ jobs:
         run: |
           pnpm install --prefer-frozen-lockfile
           pnpm -F assignment-6 lint > eslint_report.txt
+
+      - name: Lint Success
+        if: success()
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.TOKEN_FOR_CI }}
+          script: |
+            const fs = require('fs')
+            const eslintReport = fs.readFileSync('eslint_report.txt', 'utf8')
+
+            const lint = require('.github/scripts/lint.js');
+            await lint.reportLintSuccess({
+              context,
+              github
+            });
+
       - name: Lint Failure
         if: failure()
         uses: actions/github-script@v6
@@ -52,15 +68,12 @@ jobs:
           script: |
             const fs = require('fs')
             const eslintReport = fs.readFileSync('eslint_report.txt', 'utf8')
-            await github.rest.issues.createComment({
-              issue_number: context.issue.number,
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              body: `
-              ## ESLint Results
 
-              ${eslintReport}
-              `
+            const lint = require('.github/scripts/lint.js');
+            await lint.reportLintFailure({
+              eslintReport,
+              context,
+              github
             });
 
   test:
@@ -126,10 +139,12 @@ jobs:
         run: |
           npm i -g @lhci/cli 
           pnpm install --prefer-frozen-lockfile
+
       - name: Build Local Server
         run: |
           pnpm -F assignment-6 build
           pnpm -F assignment-6 lighthouse
+
       - name: Report Lighthouse
         if: success()
         uses: actions/github-script@v6
@@ -140,7 +155,6 @@ jobs:
           script: |
             const fs = require('fs');
             const results = JSON.parse(fs.readFileSync("packages/assignment-6/lhci_reports/manifest.json", 'utf-8'))
-            console.log(results)
 
             let comments = "";
 
