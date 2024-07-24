@@ -197,19 +197,14 @@ jobs:
         with:
           github-token: ${{secrets.TOKEN_FOR_CI}}
           script: |
-            const reviewers = ["yoosion030", "dhp94d", "lydiahjchung", "callipenguin"];
-            const randomReviewer = reviewers[Math.floor(Math.random() * reviewers.length)];
+            const review = require('.github/scripts/reviewer.js');
 
-            await github.rest.issues.createComment({
-              issue_number: context.issue.number,
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              body: `@${randomReviewer}, 리뷰를 부탁드립니다.`
+            await review.commentReviewer({
+              context,
+              github
             });
 
-            await github.rest.pulls.requestReviewers({
-              pull_number: context.issue.number,
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              reviewers: [randomReviewer]
+            await review.assignReviewer({
+              context,
+              github
             });
