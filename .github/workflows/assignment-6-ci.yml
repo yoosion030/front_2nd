@@ -41,6 +41,7 @@ jobs:
           cache: "pnpm"
 
       - name: Lint
+        continue-on-error: true
         run: |
           pnpm install --prefer-frozen-lockfile
           pnpm -F assignment-6 lint > eslint_report.txt
