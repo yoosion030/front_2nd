@@ -15,28 +15,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
-        with:
-          version: 8
-          run_install: false
 
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: "pnpm"
-
-      - name: Get pnpm store directory
-        shell: bash
-        run: |
-          echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
-      - name: Install PNPM
-        run: |
-          pnpm install --prefer-frozen-lockfile
-      - name: Cache dependencies
-        uses: actions/cache@v4
-        with:
-          path: ~/.pnpm-store
-          key: ${{ runner.os }}-pnpm-${{ hashFiles('**/pnpm-lock.yaml') }}
+      - name: Setup Node.js and Dependencies
+        uses: ./.github/actions/setup-node-dependencies
 
       - name: Build
         run: |
@@ -46,28 +27,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
-        with:
-          version: 8
-          run_install: false
 
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: "pnpm"
-
-      - name: Get pnpm store directory
-        shell: bash
-        run: |
-          echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
-      - name: Install PNPM
-        run: |
-          pnpm install --prefer-frozen-lockfile
-      - name: Cache dependencies
-        uses: actions/cache@v4
-        with:
-          path: ~/.pnpm-store
-          key: ${{ runner.os }}-pnpm-${{ hashFiles('**/pnpm-lock.yaml') }}
+      - name: Setup Node.js and Dependencies
+        uses: ./.github/actions/setup-node-dependencies
 
       - name: Lint
         run: |
@@ -108,28 +70,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
-        with:
-          version: 8
-          run_install: false
 
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: "pnpm"
-
-      - name: Get pnpm store directory
-        shell: bash
-        run: |
-          echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
-      - name: Install PNPM
-        run: |
-          pnpm install --prefer-frozen-lockfile
-      - name: Cache dependencies
-        uses: actions/cache@v4
-        with:
-          path: ~/.pnpm-store
-          key: ${{ runner.os }}-pnpm-${{ hashFiles('**/pnpm-lock.yaml') }}
+      - name: Setup Node.js and Dependencies
+        uses: ./.github/actions/setup-node-dependencies
 
       - name: Testing and Coverage
         run: |
@@ -169,28 +112,9 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
-        with:
-          version: 8
-          run_install: false
 
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: "pnpm"
-
-      - name: Get pnpm store directory
-        shell: bash
-        run: |
-          echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
-      - name: Install PNPM
-        run: |
-          pnpm install --prefer-frozen-lockfile
-      - name: Cache dependencies
-        uses: actions/cache@v4
-        with:
-          path: ~/.pnpm-store
-          key: ${{ runner.os }}-pnpm-${{ hashFiles('**/pnpm-lock.yaml') }}
+      - name: Setup Node.js and Dependencies
+        uses: ./.github/actions/setup-node-dependencies
 
       - name: Install Lighthouse CI
         run: |
@@ -243,7 +167,6 @@ jobs:
       - uses: pnpm/action-setup@v4
         with:
           version: 8
-          run_install: false
 
       - uses: actions/setup-node@v4
         with:
