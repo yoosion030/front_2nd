@@ -179,13 +179,16 @@ jobs:
           github-token: ${{secrets.TOKEN_FOR_CI}}
           script: |
             const review = require('.github/scripts/review.js');
+            const randomReviewer = review.getRandomReviewer();
 
             await review.commentReviewer({
               context,
-              github
+              github,
+              reviewer: randomReviewer
             });
 
             await review.assignReviewer({
               context,
-              github
+              github,
+              reviewer: randomReviewer
             });
